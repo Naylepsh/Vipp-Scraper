@@ -135,9 +135,16 @@ const isNumeric = (x) => {
 };
 
 const toDimensions = (height, width, depth, unit) => {
-  if (height && width && depth) {
-    return `H: ${height} x W: ${width} x D: ${depth} ${unit}`;
-  }
+  const heightStr = toDimensionStr("H", height);
+  const widthStr = toDimensionStr("W", width);
+  const depthStr = toDimensionStr("D", depth);
+  const unitStr = height || width || depth ? ` ${unit}` : "";
+
+  return [heightStr, widthStr, depthStr].join(" x ") + unitStr;
+};
+
+const toDimensionStr = (symbol, value) => {
+  return value ? `${symbol}: ${value}` : "";
 };
 
 const getWeight = (details) => {
