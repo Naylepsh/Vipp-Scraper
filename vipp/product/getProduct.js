@@ -4,10 +4,11 @@ import { supplier, brand, coreUrl } from "../constants.js";
 import { capitalize } from "../../utils/capitalize.js";
 
 export const getProduct = async (url, log) => {
+  const absoluteUrl = toProductUrl(url);
   try {
-    log(`Processing ${url}...`);
+    log(`Processing ${absoluteUrl}...`);
 
-    const res = await fetch(toProductUrl(url));
+    const res = await fetch(absoluteUrl);
     const text = await res.text();
 
     const { document } = new JSDOM(text).window;
@@ -21,18 +22,18 @@ export const getProduct = async (url, log) => {
       images: getImagesFromGallery(gallery),
     };
 
-    log(`Processing ${url}: Done`);
+    log(`Processing ${absoluteUrl}: Done`);
 
     return data;
   } catch (error) {
-    const msg = `Failure during processing of product at url: ${url}:\n${error.message};${error.stack}`;
+    const msg = `Failure during processing of product at url: ${absoluteUrl}:\n${error.message};${error.stack}`;
     log(msg);
     return {};
   }
 };
 
 const toProductUrl = (url) => {
-  return `${coreUrl}/${url}`;
+  return `${coreUrl}${url}`;
 };
 
 const getImagesFromGallery = (gallery) => {
@@ -123,7 +124,14 @@ const getLength = (names, values) => {
 
 const getDimension = (dimension, names, values) => {
   const i = names.indexOf(dimension);
-  return values[i];
+  const value = values[i];
+  return isNumeric(value) ? value : undefined;
+};
+
+const isNumeric = (x) => {
+  // vipp uses comma separators
+  const str = ("" + x).replace(/\,/g, ".");
+  return !isNaN(parseFloat(str)) && isFinite(str);
 };
 
 const toDimensions = (height, width, depth, unit) => {

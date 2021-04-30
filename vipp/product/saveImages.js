@@ -9,7 +9,7 @@ export const saveImages = (sku, urls, dest) => {
   } else {
     return Promise.all(
       urls.map((url, index) => {
-        const path = toDest(`${sku}_${index}.jpg`);
+        const path = toDest(`${sku}_${index + 1}.jpg`);
         return downloadFile(url, path);
       })
     );
