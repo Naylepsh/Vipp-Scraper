@@ -5,11 +5,11 @@ import { capitalize } from "../utils/capitalize.js";
 
 export const saveProduct = (product) => {};
 
-export const getProduct = async (url, log) => {
+export const getProduct = async (url, shouldLog = true) => {
   let status;
   try {
-    if (log) {
-      log(`Processing ${url}...`);
+    if (shouldLog) {
+      console.log(`Processing ${url}...`);
     }
 
     const res = await fetch(toProductUrl(url));
@@ -25,15 +25,14 @@ export const getProduct = async (url, log) => {
       ...getProductDataFromDetails(details),
     };
 
-    if (log) {
-      log(`Processing ${url}: Done`);
+    if (shouldLog) {
+      console.log(`Processing ${url}: Done`);
     }
 
     return data;
   } catch (error) {
     const msg = `Failure during processing of product at url: ${url}:\n${error.message};${error.stack}`;
-    log(msg);
-    log(`res: ${status}`);
+    console.log(msg);
     return [];
   }
 };
