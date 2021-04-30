@@ -3,20 +3,39 @@ import { JSDOM } from "jsdom";
 import { supplier, brand, coreUrl } from "./constants.js";
 import { capitalize } from "../utils/capitalize.js";
 
-export const getProduct = async (url) => {
-  const res = await fetch(toProductUrl(url));
-  const text = await res.text();
+export const saveProduct = (product) => {};
 
-  const { document } = new JSDOM(text).window;
+export const getProduct = async (url, log) => {
+  let status;
+  try {
+    if (log) {
+      log(`Processing ${url}...`);
+    }
 
-  const summary = document.querySelector(".product-info__flag > div");
-  const details = document.querySelector("#product-detail > div > div");
-  const data = {
-    ...getProductDataFromSummary(summary),
-    ...getProductDataFromDetails(details),
-  };
+    const res = await fetch(toProductUrl(url));
+    const text = await res.text();
+    status = res.status;
 
-  return data;
+    const { document } = new JSDOM(text).window;
+
+    const summary = document.querySelector(".product-info__flag > div");
+    const details = document.querySelector("#product-detail > div > div");
+    const data = {
+      ...getProductDataFromSummary(summary),
+      ...getProductDataFromDetails(details),
+    };
+
+    if (log) {
+      log(`Processing ${url}: Done`);
+    }
+
+    return data;
+  } catch (error) {
+    const msg = `Failure during processing of product at url: ${url}:\n${error.message};${error.stack}`;
+    log(msg);
+    log(`res: ${status}`);
+    return [];
+  }
 };
 
 const toProductUrl = (url) => {
@@ -65,12 +84,14 @@ const getProductDataFromDetails = (details) => {
 
 const getDimensions = (details) => {
   const dimensionsDiv = getRowFromDetails(details, "Dimensjoner");
+  if (!dimensionsDiv) return;
 
   const dimensions = dimensionsDiv.children[1].textContent
     .replace(/\s+/g, "")
     .split("cm")[0] // removes notes
     .split(":");
   const [names, values] = dimensions.map((dim) => dim.split("x"));
+  if (!names || !values) return {};
 
   const length = getLength(names, values);
   // sometimes length acts as either one of width, height or depth

@@ -1,18 +1,27 @@
 import { getProduct } from "./vipp/product.js";
-import { getLinksToProducts } from "./vipp/products.js";
+import { getLinksToProducts, saveProducts } from "./vipp/products.js";
+import { log } from "./utils/logger.js";
 
 const main = async () => {
-  const links = await getLinksToProducts();
-  // const link = '/no/products/cabin-kjøkkenstol' // those meme letters dont work
-  // const link = "/no/products/bademodul-medium-0";
-  // const link = "/no/products/pedalb%C3%B8tte-4-l";
-  // const link = "/no/products/vannkoker";
-  // const data = await getProduct(link);
-  const xs = links.slice(0, 5);
-  const data = await Promise.all(xs.map(getProduct));
-  for (const d of data) {
-    console.log(d);
+  const amount = 20;
+  let offset = 100;
+  while (true) {
+    log(`Loading products: ${offset}-${offset + amount}`);
+
+    const [links, hasMore] = await getLinksToProducts(amount, offset);
+    const products = await Promise.all(
+      links.map((link) => getProduct(link, log))
+    );
+    saveProducts(products);
+
+    if (!hasMore) {
+      break;
+    }
+
+    offset += amount;
   }
+
+  log("Done with all the products");
 };
 
 main();

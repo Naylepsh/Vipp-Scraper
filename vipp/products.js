@@ -1,5 +1,20 @@
 import fetch from "node-fetch";
 import { coreUrl } from "./constants.js";
+import { saveProduct } from "./product.js";
+
+export const saveProducts = (products) => {
+  console.log("saving products...");
+};
+
+export const getLinksToProducts = async (amount, offset = 0) => {
+  const url = toProductsUrl(amount, offset);
+  const res = await fetch(url);
+  const json = await res.json();
+
+  const links = json.products.map((product) => encodeURI(product.link));
+
+  return [links, hasMoreData(json)];
+};
 
 const toProductsUrl = (amount, offset = 0) => {
   const productsUrl = `${coreUrl}/no/api/products`;
@@ -8,28 +23,4 @@ const toProductsUrl = (amount, offset = 0) => {
 
 const hasMoreData = (resJson) => {
   return resJson.rangeOffset === 0;
-};
-
-export const getLinksToProducts = async () => {
-  const links = [];
-  const amount = 100;
-  let offset = 0;
-  while (true) {
-    const url = toProductsUrl(amount, offset);
-    const res = await fetch(url);
-    const json = await res.json();
-
-    const linksThisIter = json.products.map((product) =>
-      encodeURI(product.link)
-    );
-    links.push(...linksThisIter);
-
-    if (!hasMoreData(json)) {
-      break;
-    }
-
-    offset += amount;
-  }
-
-  return links;
 };
