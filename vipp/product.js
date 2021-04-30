@@ -18,20 +18,32 @@ const toProductUrl = (url) => {
 };
 
 const getProductDataFromSummary = (summary) => {
-  const sku = createSku(summary.querySelector("h4").textContent);
-  const [name, variant] = createNameAndVariant(
-    summary.querySelector("h1").textContent
-  );
-  const description = summary.querySelector("div").textContent;
+  const sku = getSku(summary);
+  const [name, variant] = getNameAndVariant(summary);
+  const description = getDescription(summary);
+  const [price, currency] = getPriceAndCurrency(summary);
 
-  return { sku, brand, supplier, name, variant, description };
+  return { sku, brand, supplier, name, variant, description, price, currency };
 };
 
-const createSku = (text) => {
+const getSku = (summary) => {
+  const text = summary.querySelector("h4").textContent;
   const brandPrefix = brand.replace(/\s+/g, "").toLowerCase();
   return `${brandPrefix}-${text}`;
 };
 
-const createNameAndVariant = (text) => {
-  return text.split(", ").map((t) => t.trim());
+const getNameAndVariant = (summary) => {
+  const text = summary.querySelector("h1").textContent;
+  const [name, variant] = text.split(", ").map((t) => t.trim());
+  return [name, variant];
+};
+
+const getDescription = (summary) => {
+  return summary.querySelector("div").textContent;
+};
+
+const getPriceAndCurrency = (summary) => {
+  const text = summary.querySelector("p#price-product").textContent;
+  const [price, currency] = text.split(" ");
+  return [price, currency];
 };
