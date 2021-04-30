@@ -1,5 +1,5 @@
 import { mkdir } from "fs/promises";
-import { runScraper } from "./vipp/scraper.js";
+import { runScraper } from "./scraper/index.js";
 import { consoleLogger, nullLogger } from "./utils/logger.js";
 import { saveProductsToCsv } from "./utils/csvWriter.js";
 

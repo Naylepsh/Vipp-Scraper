@@ -183,7 +183,11 @@ const toDimensions = (height, width, depth, unit) => {
   const depthStr = toDimensionStr("D", depth);
   const unitStr = height || width || depth ? ` ${unit}` : "";
 
-  return [heightStr, widthStr, depthStr].join(" x ") + unitStr;
+  return (
+    [heightStr, widthStr, depthStr]
+      .filter((dim) => dim.length > 3)
+      .join(" x ") + unitStr
+  );
 };
 
 const toDimensionStr = (symbol, value) => {
