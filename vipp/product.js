@@ -58,8 +58,9 @@ const getProductDataFromDetails = (details) => {
   getDimensions(details);
   const designer = getDesigner(details);
   const material = getMaterial(details);
+  const weight = getWeight(details);
 
-  return { designer, material };
+  return { designer, material, weight };
 };
 
 const getDimensions = (details) => {
@@ -67,6 +68,15 @@ const getDimensions = (details) => {
 
   const dimensions = dimensionsDiv.children[1].textContent.split(":");
   // TODO
+};
+
+const getWeight = (details) => {
+  const weightDiv = getRowFromDetails(details, "Vekt");
+  if (!weightDiv) return;
+
+  const weight = weightDiv.querySelector("p").textContent.split(".")[0];
+
+  return weight;
 };
 
 const getDesigner = (details) => {
