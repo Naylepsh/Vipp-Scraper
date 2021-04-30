@@ -2,6 +2,7 @@ import fetch from "node-fetch";
 import { JSDOM } from "jsdom";
 import { supplier, brand, coreUrl } from "../constants.js";
 import { capitalize } from "../../utils/capitalize.js";
+import { isNumeric } from "../../utils/isNumeric.js";
 
 export const getProduct = async (url, log) => {
   const absoluteUrl = toProductUrl(url);
@@ -46,8 +47,20 @@ const getProductDataFromSummary = (summary) => {
   const { name, variant } = getNameAndVariant(summary);
   const description = getDescription(summary);
   const { price, currency } = getPriceAndCurrency(summary);
+  const { name: attributeName, attribute } = getAttributeFromVariant(variant);
 
-  return { sku, brand, supplier, name, variant, description, price, currency };
+  return {
+    sku,
+    brand,
+    supplier,
+    name,
+    variant,
+    description,
+    price,
+    currency,
+    names: attributeName,
+    attribute1: attribute,
+  };
 };
 
 const getSku = (summary) => {
@@ -71,6 +84,42 @@ const getPriceAndCurrency = (summary) => {
   const [price, currency] = text.split(" ");
   return { price, currency };
 };
+
+const getAttributeFromVariant = (variant) => {
+  if (!variant) {
+    return {};
+  }
+
+  for (const [classifier, name] of classifiedAttributes) {
+    if (classifier(variant)) {
+      return { name, attribute: variant };
+    }
+  }
+
+  return { name: "Unclassified", attribute: variant };
+};
+
+const isSizeAttribute = (variant) => {
+  return ["small", "medium", "large"].includes(variant);
+};
+
+const isVolumeAttribute = (variant) => {
+  if (!variant) return false;
+
+  const [volume, unit] = variant.split(" ");
+  return isNumeric(volume) && unit === "L";
+};
+
+const isShapeAttribute = (variant) => {
+  const [shape] = variant.split(" ");
+  return ["rund", "firkantet"].includes(shape);
+};
+
+const classifiedAttributes = [
+  [isSizeAttribute, "Size"],
+  [isVolumeAttribute, "Volume"],
+  [isShapeAttribute, "Shape"],
+];
 
 const getProductDataFromDetails = (details) => {
   const dimensions = getDimensions(details);
@@ -126,12 +175,6 @@ const getDimension = (dimension, names, values) => {
   const i = names.indexOf(dimension);
   const value = values[i];
   return isNumeric(value) ? value : undefined;
-};
-
-const isNumeric = (x) => {
-  // vipp uses comma separators
-  const str = ("" + x).replace(/\,/g, ".");
-  return !isNaN(parseFloat(str)) && isFinite(str);
 };
 
 const toDimensions = (height, width, depth, unit) => {
