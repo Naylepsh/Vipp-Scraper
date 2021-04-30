@@ -72,11 +72,18 @@ const getDimensions = (details) => {
     .split(":");
   const [names, values] = dimensions.map((dim) => dim.split("x"));
 
-  const width = getWidth(names, values);
-  const height = getHeight(names, values);
-  const depth = getDepth(names, values);
+  const length = getLength(names, values);
+  // sometimes length acts as either one of width, height or depth
+  const width = getWidth(names, values) || length;
+  const height = getHeight(names, values) || length;
+  const depth = getDepth(names, values) || length;
 
-  return { width, height, depth };
+  return {
+    width,
+    height,
+    depth,
+    dimensions: toDimensions(width, height, depth, "cm"),
+  };
 };
 
 const getWidth = (names, values) => {
@@ -91,9 +98,19 @@ const getDepth = (names, values) => {
   return getDimension("D", names, values);
 };
 
+const getLength = (names, values) => {
+  return getDimension("L", names, values);
+};
+
 const getDimension = (dimension, names, values) => {
   const i = names.indexOf(dimension);
   return values[i];
+};
+
+const toDimensions = (height, width, depth, unit) => {
+  if (height && width && depth) {
+    return `H: ${height} x W: ${width} x D: ${depth} ${unit}`;
+  }
 };
 
 const getWeight = (details) => {
