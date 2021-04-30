@@ -1,12 +1,5 @@
 import fetch from "node-fetch";
-import { coreUrl } from "./constants.js";
-import { saveProduct } from "./product.js";
-
-export const saveProducts = (products, downloadFolder) => {
-  return Promise.all(
-    products.map((product) => saveProduct(product, downloadFolder))
-  );
-};
+import { coreUrl } from "../constants.js";
 
 export const getLinksToProducts = async (amount, offset = 0) => {
   const url = toProductsUrl(amount, offset);

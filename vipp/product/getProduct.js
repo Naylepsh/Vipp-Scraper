@@ -1,48 +1,14 @@
 import fetch from "node-fetch";
 import { JSDOM } from "jsdom";
-import { resolve, join } from "path";
-import { supplier, brand, coreUrl } from "./constants.js";
-import { capitalize } from "../utils/capitalize.js";
-import { downloadFile } from "../utils/download.js";
+import { supplier, brand, coreUrl } from "../constants.js";
+import { capitalize } from "../../utils/capitalize.js";
 
-export const saveProduct = ({ images, ...product }, dest) => {
-  return Promise.all([
-    saveImages(product.sku, images, dest),
-    saveProductToCSV(product),
-  ]);
-};
-
-const saveImages = (sku, urls, dest) => {
-  const toDest = toPath(dest);
-  if (urls.length === 1) {
-    const path = toDest(`${sku}.jpg`);
-    return downloadFile(urls[0], path);
-  } else {
-    return Promise.all(
-      urls.map((url, index) => {
-        const path = toDest(`${sku}_${index}.jpg`);
-        return downloadFile(url, path);
-      })
-    );
-  }
-};
-
-const toPath = (folder) => (filename) => join(resolve(), folder, filename);
-
-const saveProductToCSV = (product) => {
-  return;
-};
-
-export const getProduct = async (url, shouldLog = true) => {
-  let status;
+export const getProduct = async (url, log) => {
   try {
-    if (shouldLog) {
-      console.log(`Processing ${url}...`);
-    }
+    log(`Processing ${url}...`);
 
     const res = await fetch(toProductUrl(url));
     const text = await res.text();
-    status = res.status;
 
     const { document } = new JSDOM(text).window;
 
@@ -55,20 +21,23 @@ export const getProduct = async (url, shouldLog = true) => {
       images: getImagesFromGallery(gallery),
     };
 
-    if (shouldLog) {
-      console.log(`Processing ${url}: Done`);
-    }
+    log(`Processing ${url}: Done`);
 
     return data;
   } catch (error) {
     const msg = `Failure during processing of product at url: ${url}:\n${error.message};${error.stack}`;
-    console.log(msg);
-    return [];
+    log(msg);
+    return {};
   }
 };
 
 const toProductUrl = (url) => {
   return `${coreUrl}/${url}`;
+};
+
+const getImagesFromGallery = (gallery) => {
+  const imgs = gallery.querySelectorAll("img");
+  return Array.from(imgs).map((img) => img.src);
 };
 
 const getProductDataFromSummary = (summary) => {
@@ -200,9 +169,4 @@ const getRowFromDetails = (details, rowName) => {
   return Array.from(details.querySelectorAll(".line")).find(
     (element) => element.children[0].textContent === rowName
   );
-};
-
-const getImagesFromGallery = (gallery) => {
-  const imgs = gallery.querySelectorAll("img");
-  return Array.from(imgs).map((img) => img.src);
 };
