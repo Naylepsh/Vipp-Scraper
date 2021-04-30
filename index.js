@@ -1,14 +1,23 @@
 import { getProduct } from "./vipp/product.js";
+import { mkdir } from "fs/promises";
 import { getLinksToProducts, saveProducts } from "./vipp/products.js";
 
 const main = async () => {
   const shouldLog = true;
-  await runScraper(shouldLog);
+  const downloadFolder = "./downloads";
+  await setup(downloadFolder);
+  await runScraper(shouldLog, downloadFolder);
 };
 
-const runScraper = async (shouldLog) => {
+const setup = async (downloadFolder) => {
+  try {
+    await mkdir(downloadFolder);
+  } catch (_e) {}
+};
+
+const runScraper = async (shouldLog, downloadFolder) => {
   const amount = 20;
-  let offset = 100;
+  let offset = 125;
   while (true) {
     console.log(`Loading products: ${offset}-${offset + amount}`);
 
@@ -16,7 +25,7 @@ const runScraper = async (shouldLog) => {
     const products = await Promise.all(
       links.map((link) => getProduct(link, shouldLog))
     );
-    saveProducts(products);
+    await saveProducts(products, downloadFolder);
 
     if (!hasMore) {
       break;

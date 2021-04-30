@@ -1,9 +1,37 @@
 import fetch from "node-fetch";
 import { JSDOM } from "jsdom";
+import { resolve, join } from "path";
 import { supplier, brand, coreUrl } from "./constants.js";
 import { capitalize } from "../utils/capitalize.js";
+import { downloadFile } from "../utils/download.js";
 
-export const saveProduct = (product) => {};
+export const saveProduct = ({ images, ...product }, dest) => {
+  return Promise.all([
+    saveImages(product.sku, images, dest),
+    saveProductToCSV(product),
+  ]);
+};
+
+const saveImages = (sku, urls, dest) => {
+  const toDest = toPath(dest);
+  if (urls.length === 1) {
+    const path = toDest(`${sku}.jpg`);
+    return downloadFile(urls[0], path);
+  } else {
+    return Promise.all(
+      urls.map((url, index) => {
+        const path = toDest(`${sku}_${index}.jpg`);
+        return downloadFile(url, path);
+      })
+    );
+  }
+};
+
+const toPath = (folder) => (filename) => join(resolve(), folder, filename);
+
+const saveProductToCSV = (product) => {
+  return;
+};
 
 export const getProduct = async (url, shouldLog = true) => {
   let status;
@@ -20,9 +48,11 @@ export const getProduct = async (url, shouldLog = true) => {
 
     const summary = document.querySelector(".product-info__flag > div");
     const details = document.querySelector("#product-detail > div > div");
+    const gallery = document.querySelector("#module-product-info__gallery");
     const data = {
       ...getProductDataFromSummary(summary),
       ...getProductDataFromDetails(details),
+      images: getImagesFromGallery(gallery),
     };
 
     if (shouldLog) {
@@ -170,4 +200,9 @@ const getRowFromDetails = (details, rowName) => {
   return Array.from(details.querySelectorAll(".line")).find(
     (element) => element.children[0].textContent === rowName
   );
+};
+
+const getImagesFromGallery = (gallery) => {
+  const imgs = gallery.querySelectorAll("img");
+  return Array.from(imgs).map((img) => img.src);
 };

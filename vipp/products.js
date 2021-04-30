@@ -2,8 +2,10 @@ import fetch from "node-fetch";
 import { coreUrl } from "./constants.js";
 import { saveProduct } from "./product.js";
 
-export const saveProducts = (products) => {
-  console.log("saving products...");
+export const saveProducts = (products, downloadFolder) => {
+  return Promise.all(
+    products.map((product) => saveProduct(product, downloadFolder))
+  );
 };
 
 export const getLinksToProducts = async (amount, offset = 0) => {
