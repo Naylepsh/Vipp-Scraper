@@ -55,19 +55,45 @@ const getPriceAndCurrency = (summary) => {
 };
 
 const getProductDataFromDetails = (details) => {
-  getDimensions(details);
+  const dimensions = getDimensions(details);
   const designer = getDesigner(details);
   const material = getMaterial(details);
   const weight = getWeight(details);
 
-  return { designer, material, weight };
+  return { designer, material, weight, ...dimensions };
 };
 
 const getDimensions = (details) => {
   const dimensionsDiv = getRowFromDetails(details, "Dimensjoner");
 
-  const dimensions = dimensionsDiv.children[1].textContent.split(":");
-  // TODO
+  const dimensions = dimensionsDiv.children[1].textContent
+    .replace(/\s+/g, "")
+    .split("cm")[0] // removes notes
+    .split(":");
+  const [names, values] = dimensions.map((dim) => dim.split("x"));
+
+  const width = getWidth(names, values);
+  const height = getHeight(names, values);
+  const depth = getDepth(names, values);
+
+  return { width, height, depth };
+};
+
+const getWidth = (names, values) => {
+  return getDimension("B", names, values);
+};
+
+const getHeight = (names, values) => {
+  return getDimension("H", names, values);
+};
+
+const getDepth = (names, values) => {
+  return getDimension("D", names, values);
+};
+
+const getDimension = (dimension, names, values) => {
+  const i = names.indexOf(dimension);
+  return values[i];
 };
 
 const getWeight = (details) => {

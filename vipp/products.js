@@ -19,7 +19,9 @@ export const getLinksToProducts = async () => {
     const res = await fetch(url);
     const json = await res.json();
 
-    const linksThisIter = json.products.map((product) => product.link);
+    const linksThisIter = json.products.map((product) =>
+      encodeURI(product.link)
+    );
     links.push(...linksThisIter);
 
     if (!hasMoreData(json)) {
