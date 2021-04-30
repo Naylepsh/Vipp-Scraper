@@ -6,9 +6,10 @@ const main = async () => {
   const options = {
     shouldLog: true,
     downloadFolder: "./downloads",
+    csvPath: "./out.csv",
   };
   const { log } = await setup(options);
-  await runScraper(options.downloadFolder, log);
+  await runScraper(options, log);
 };
 
 const setup = async ({ downloadFolder, shouldLog }) => {

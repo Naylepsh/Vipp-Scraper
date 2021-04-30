@@ -1,14 +1,7 @@
 import { resolve, join } from "path";
 import { downloadFile } from "../../utils/download.js";
 
-export const saveProduct = ({ images, ...product }, dest) => {
-  return Promise.all([
-    saveImages(product.sku, images, dest),
-    saveProductToCSV(product),
-  ]);
-};
-
-const saveImages = (sku, urls, dest) => {
+export const saveImages = (sku, urls, dest) => {
   const toDest = toPath(dest);
   if (urls.length === 1) {
     const path = toDest(`${sku}.jpg`);
@@ -24,7 +17,3 @@ const saveImages = (sku, urls, dest) => {
 };
 
 const toPath = (folder) => (filename) => join(resolve(), folder, filename);
-
-const saveProductToCSV = (product) => {
-  return;
-};
