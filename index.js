@@ -2,16 +2,13 @@ import { mkdir } from "fs/promises";
 import { runScraper } from "./scraper/index.js";
 import { consoleLogger, nullLogger } from "./utils/logger.js";
 import { saveProductsToCsv } from "./utils/csvWriter.js";
+import { loadConfig } from "./config.js";
 
 const main = async () => {
-  const options = {
-    shouldLog: true,
-    downloadFolder: "./downloads",
-    csvPath: "./out.csv",
-    batchSize: 20,
-  };
-  const { log, save } = await setup(options);
-  await runScraper(options, save, log);
+  const config = loadConfig();
+  console.log(config);
+  const { log, save } = await setup(config);
+  await runScraper(config, save, log);
 };
 
 const setup = async ({ downloadFolder, csvPath, shouldLog }) => {
