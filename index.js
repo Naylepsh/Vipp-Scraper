@@ -6,7 +6,6 @@ import { loadConfig } from "./config.js";
 
 const main = async () => {
   const config = loadConfig();
-  console.log(config);
   const { log, save } = await setup(config);
   await runScraper(config, save, log);
 };
