@@ -4,7 +4,7 @@ config();
 
 export const loadConfig = () => {
   return {
-    shouldLog: getEnvVar("SHOULD_LOG"),
+    shouldLog: getEnvVar("SHOULD_LOG") || true,
     downloadFolder: getEnvVar("DOWNLOAD_FOLDER") || "./downloads",
     csvPath: getEnvVar("CSV_PATH") || "./out.csv",
     batchSize: getEnvVar("BATCH_SIZE") || 20,
